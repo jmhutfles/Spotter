@@ -1,7 +1,7 @@
 import folium
 import math
 
-def plot_jump_map(exit_lat, exit_lon, landing_lat, landing_lon, circle_radius_miles, output_file="jump_map.html"):
+def plot_jump_map(exit_lat, exit_lon, landing_lat, landing_lon, circle_radius_miles, output_file=None):
     """
     Plot exit point and landing zone on satellite map with glide circle
     
@@ -11,7 +11,7 @@ def plot_jump_map(exit_lat, exit_lon, landing_lat, landing_lon, circle_radius_mi
         landing_lat (float): Landing zone latitude
         landing_lon (float): Landing zone longitude
         circle_radius_miles (float): Glide circle radius in miles
-        output_file (str): Output HTML file name
+        output_file (str): Output HTML file name (if None, don't save to file)
     
     Returns:
         folium.Map: The created map object
@@ -139,9 +139,9 @@ def plot_jump_map(exit_lat, exit_lon, landing_lat, landing_lon, circle_radius_mi
     # Add layer control
     folium.LayerControl().add_to(m)
     
-    # Save map
-    m.save(output_file)
-    
+    # Save map only if output_file is specified
+    if output_file:
+        m.save(output_file)
     
     return m
 

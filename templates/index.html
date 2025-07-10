@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skydive Wind Spotter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.8;
+        }
+        
+        .content {
+            display: flex;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            width: 350px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-right: 1px solid #dee2e6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #5a6fd8;
+        }
+        
+        .btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .map-container {
+            flex: 1;
+            position: relative;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            display: none;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .summary {
+            background: #e3f2fd;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+        
+        .summary h3 {
+            margin: 0 0 15px 0;
+            color: #1976d2;
+        }
+        
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+        
+        .summary-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .summary-label {
+            font-weight: 600;
+        }
+        
+        .summary-value {
+            color: #1976d2;
+            font-weight: 600;
+        }
+        
+        .error {
+            background: #ffebee;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #f44336;
+            margin-top: 20px;
+        }
+        
+        .placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            text-align: center;
+            color: #6c757d;
+            font-size: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🪂 Skydive Wind Spotter</h1>
+            <p>Calculate optimal exit points based on real-time wind data</p>
+        </div>
+        
+        <div class="content">
+            <div class="sidebar">
+                <form id="jumpForm">
+                    <div class="form-group">
+                        <label for="latitude">Latitude:</label>
+                        <input type="number" id="latitude" step="0.000001" value="39.707250" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="longitude">Longitude:</label>
+                        <input type="number" id="longitude" step="0.000001" value="-75.036050" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="glide_circle">Glide Circle (miles):</label>
+                        <input type="number" id="glide_circle" step="0.1" value="1.0" min="0.1" max="5" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descent_rate">Canopy Descent Rate (mph):</label>
+                        <input type="number" id="descent_rate" step="0.1" value="8.5" min="5" max="20" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" id="calculateBtn">Calculate Jump Plan</button>
+                </form>
+                
+                <div id="summary" class="summary" style="display: none;">
+                    <h3>Jump Summary</h3>
+                    <div id="summaryContent"></div>
+                </div>
+                
+                <div id="error" class="error" style="display: none;"></div>
+            </div>
+            
+            <div class="map-container">
+                <div id="mapContent" class="placeholder">
+                    Enter coordinates and click "Calculate Jump Plan" to see your optimal exit point
+                </div>
+                
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Calculating wind drift...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('jumpForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const btn = document.getElementById('calculateBtn');
+            const loading = document.getElementById('loading');
+            const mapContent = document.getElementById('mapContent');
+            const summary = document.getElementById('summary');
+            const error = document.getElementById('error');
+            
+            // Show loading state
+            btn.disabled = true;
+            btn.textContent = 'Calculating...';
+            loading.style.display = 'block';
+            summary.style.display = 'none';
+            error.style.display = 'none';
+            
+            // Collect form data
+            const formData = {
+                latitude: parseFloat(document.getElementById('latitude').value),
+                longitude: parseFloat(document.getElementById('longitude').value),
+                glide_circle: parseFloat(document.getElementById('glide_circle').value),
+                descent_rate: parseFloat(document.getElementById('descent_rate').value)
+            };
+            
+            try {
+                const response = await fetch('/calculate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Display map
+                    mapContent.innerHTML = result.map_html;
+                    
+                    // Display summary
+                    const summaryContent = document.getElementById('summaryContent');
+                    summaryContent.innerHTML = `
+                        <div class="summary-item">
+                            <span class="summary-label">Exit Point:</span>
+                            <span class="summary-value">${result.summary.exit_lat}, ${result.summary.exit_lon}</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Drift:</span>
+                            <span class="summary-value">${result.summary.total_drift_feet} ft (${result.summary.total_drift_miles} mi)</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Freefall Drift:</span>
+                            <span class="summary-value">${result.summary.freefall_drift_feet} ft</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Canopy Drift:</span>
+                            <span class="summary-value">${result.summary.canopy_drift_feet} ft</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Total Jump Time:</span>
+                            <span class="summary-value">${result.summary.total_time_minutes} min</span>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">Wind Direction:</span>
+                            <span class="summary-value">${result.summary.wind_direction}°</span>
+                        </div>
+                    `;
+                    summary.style.display = 'block';
+                } else {
+                    error.textContent = result.error;
+                    error.style.display = 'block';
+                }
+                
+            } catch (err) {
+                error.textContent = 'Network error: ' + err.message;
+                error.style.display = 'block';
+            } finally {
+                // Reset loading state
+                btn.disabled = false;
+                btn.textContent = 'Calculate Jump Plan';
+                loading.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
