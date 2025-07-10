@@ -8,7 +8,7 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
         }
@@ -25,34 +25,36 @@
         .header {
             background: #2c3e50;
             color: white;
-            padding: 30px;
+            padding: 20px;
             text-align: center;
         }
         
         .header h1 {
             margin: 0;
-            font-size: 2.5em;
+            font-size: 2em;
         }
         
         .header p {
             margin: 10px 0 0 0;
             opacity: 0.8;
+            font-size: 0.9em;
         }
         
         .content {
             display: flex;
+            flex-direction: column;
             min-height: 600px;
         }
         
         .sidebar {
-            width: 350px;
-            padding: 30px;
+            width: 100%;
+            padding: 20px;
             background: #f8f9fa;
-            border-right: 1px solid #dee2e6;
+            border-bottom: 1px solid #dee2e6;
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
         
         .form-group label {
@@ -60,6 +62,7 @@
             margin-bottom: 5px;
             font-weight: 600;
             color: #2c3e50;
+            font-size: 14px;
         }
         
         .form-group input, .form-group select {
@@ -80,19 +83,21 @@
         
         .location-toggle {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 15px;
         }
         
         .toggle-btn {
             flex: 1;
-            padding: 10px;
+            padding: 12px 8px;
             border: 2px solid #dee2e6;
             background: white;
             border-radius: 8px;
             cursor: pointer;
             text-align: center;
             transition: all 0.3s;
+            font-size: 14px;
+            font-weight: 600;
         }
         
         .toggle-btn.active {
@@ -120,6 +125,7 @@
             font-weight: 600;
             cursor: pointer;
             transition: background 0.3s;
+            margin-top: 10px;
         }
         
         .btn:hover {
@@ -134,6 +140,8 @@
         .map-container {
             flex: 1;
             position: relative;
+            min-height: 400px;
+            background: #f8f9fa;
         }
         
         .loading {
@@ -149,10 +157,10 @@
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
             border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
+            margin: 0 auto 15px;
         }
         
         @keyframes spin {
@@ -162,8 +170,8 @@
         
         .summary {
             background: #e3f2fd;
-            padding: 20px;
-            margin-top: 20px;
+            padding: 15px;
+            margin-top: 15px;
             border-radius: 8px;
             border-left: 4px solid #2196f3;
         }
@@ -171,6 +179,7 @@
         .summary h3 {
             margin: 0 0 15px 0;
             color: #1976d2;
+            font-size: 1.1em;
         }
         
         .summary-item {
@@ -178,6 +187,7 @@
             justify-content: space-between;
             margin-bottom: 8px;
             padding: 5px 0;
+            flex-wrap: wrap;
         }
         
         .summary-item:last-child {
@@ -187,11 +197,16 @@
         
         .summary-label {
             font-weight: 600;
+            font-size: 13px;
+            flex: 1;
+            min-width: 120px;
         }
         
         .summary-value {
             color: #1976d2;
             font-weight: 600;
+            font-size: 13px;
+            text-align: right;
         }
         
         .error {
@@ -200,7 +215,8 @@
             padding: 15px;
             border-radius: 8px;
             border-left: 4px solid #f44336;
-            margin-top: 20px;
+            margin-top: 15px;
+            font-size: 14px;
         }
         
         .placeholder {
@@ -210,7 +226,8 @@
             height: 100%;
             text-align: center;
             color: #6c757d;
-            font-size: 18px;
+            font-size: 16px;
+            padding: 20px;
         }
 
         .location-name {
@@ -221,6 +238,171 @@
             margin-bottom: 15px;
             border-left: 4px solid #28a745;
             font-weight: 600;
+            font-size: 14px;
+        }
+
+        /* Two-column layout for form inputs on mobile */
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        /* Collapsible sections for mobile */
+        .section-toggle {
+            display: none;
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            width: 100%;
+            text-align: left;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+
+        .section-content {
+            display: block;
+        }
+
+        /* Mobile responsive styles */
+        @media (min-width: 768px) {
+            body {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .header p {
+                font-size: 1em;
+            }
+            
+            .content {
+                flex-direction: row;
+            }
+            
+            .sidebar {
+                width: 350px;
+                padding: 30px;
+                border-right: 1px solid #dee2e6;
+                border-bottom: none;
+            }
+            
+            .map-container {
+                min-height: 600px;
+            }
+            
+            .form-group {
+                margin-bottom: 20px;
+            }
+            
+            .section-toggle {
+                display: none;
+            }
+            
+            .summary {
+                padding: 20px;
+                margin-top: 20px;
+            }
+            
+            .summary h3 {
+                font-size: 1.2em;
+            }
+            
+            .summary-label,
+            .summary-value {
+                font-size: 14px;
+            }
+        }
+
+        /* Small mobile devices */
+        @media (max-width: 480px) {
+            body {
+                padding: 5px;
+            }
+            
+            .header {
+                padding: 15px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .sidebar {
+                padding: 15px;
+            }
+            
+            .toggle-btn {
+                padding: 10px 6px;
+                font-size: 13px;
+            }
+            
+            .btn {
+                font-size: 16px;
+                padding: 12px;
+            }
+            
+            .section-toggle {
+                display: block;
+            }
+            
+            .section-content {
+                display: none;
+                padding-top: 10px;
+            }
+            
+            .section-content.show {
+                display: block;
+            }
+            
+            .map-container {
+                min-height: 300px;
+            }
+            
+            .placeholder {
+                font-size: 14px;
+                padding: 15px;
+            }
+            
+            .spinner {
+                width: 30px;
+                height: 30px;
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Map responsive styles */
+        .map-container iframe,
+        .map-container .folium-map {
+            width: 100% !important;
+            height: 100% !important;
+            border: none;
+        }
+
+        /* Touch-friendly form elements */
+        @media (hover: none) and (pointer: coarse) {
+            .form-group input,
+            .form-group select {
+                padding: 14px;
+                font-size: 16px;
+            }
+            
+            .toggle-btn {
+                padding: 14px 8px;
+            }
+            
+            .btn {
+                padding: 16px;
+                font-size: 18px;
+            }
         }
     </style>
 </head>
@@ -234,57 +416,73 @@
         <div class="content">
             <div class="sidebar">
                 <form id="jumpForm">
-                    <!-- Location Toggle -->
-                    <div class="form-group">
-                        <label>Location Selection:</label>
-                        <div class="location-toggle">
-                            <div class="toggle-btn active" id="dropzoneToggle">Dropzone</div>
-                            <div class="toggle-btn" id="customToggle">Custom</div>
+                    <!-- Collapsible Location Section for Mobile -->
+                    <button type="button" class="section-toggle" id="locationToggle">
+                        📍 Location Selection
+                    </button>
+                    <div class="section-content" id="locationContent">
+                        <!-- Location Toggle -->
+                        <div class="form-group">
+                            <label>Location Selection:</label>
+                            <div class="location-toggle">
+                                <div class="toggle-btn active" id="dropzoneToggle">Dropzone</div>
+                                <div class="toggle-btn" id="customToggle">Custom</div>
+                            </div>
+                        </div>
+
+                        <!-- Dropzone Selection -->
+                        <div id="dropzoneSection" class="location-section active">
+                            <div class="form-group">
+                                <label for="dropzone_select">Select Dropzone:</label>
+                                <select id="dropzone_select" required>
+                                    <option value="">Choose a dropzone...</option>
+                                    {% for region, dropzones in dropzones.items() %}
+                                        <optgroup label="{{ region.replace('_', ' ').title() }}">
+                                            {% for dz_name, coords in dropzones.items() %}
+                                                <option value="{{ dz_name }}" 
+                                                        data-lat="{{ coords.lat }}" 
+                                                        data-lon="{{ coords.lon }}">
+                                                    {{ dz_name }}
+                                                </option>
+                                            {% endfor %}
+                                        </optgroup>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Custom Coordinates -->
+                        <div id="customSection" class="location-section">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="latitude">Latitude:</label>
+                                    <input type="number" id="latitude" step="0.000001" value="39.707250">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="longitude">Longitude:</label>
+                                    <input type="number" id="longitude" step="0.000001" value="-75.036050">
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <!-- Dropzone Selection -->
-                    <div id="dropzoneSection" class="location-section active">
-                        <div class="form-group">
-                            <label for="dropzone_select">Select Dropzone:</label>
-                            <select id="dropzone_select" required>
-                                <option value="">Choose a dropzone...</option>
-                                {% for region, dropzones in dropzones.items() %}
-                                    <optgroup label="{{ region.replace('_', ' ').title() }}">
-                                        {% for dz_name, coords in dropzones.items() %}
-                                            <option value="{{ dz_name }}" 
-                                                    data-lat="{{ coords.lat }}" 
-                                                    data-lon="{{ coords.lon }}">
-                                                {{ dz_name }}
-                                            </option>
-                                        {% endfor %}
-                                    </optgroup>
-                                {% endfor %}
-                            </select>
+                    <!-- Collapsible Jump Parameters Section for Mobile -->
+                    <button type="button" class="section-toggle" id="paramsToggle">
+                        ⚙️ Jump Parameters
+                    </button>
+                    <div class="section-content show" id="paramsContent">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="glide_circle">Glide Circle (miles):</label>
+                                <input type="number" id="glide_circle" step="0.1" value="1.0" min="0.1" max="5" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="descent_rate">Descent Rate (mph):</label>
+                                <input type="number" id="descent_rate" step="0.1" value="8.5" min="5" max="20" required>
+                            </div>
                         </div>
-                    </div>
-
-                    <!-- Custom Coordinates -->
-                    <div id="customSection" class="location-section">
-                        <div class="form-group">
-                            <label for="latitude">Latitude:</label>
-                            <input type="number" id="latitude" step="0.000001" value="39.707250">
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="longitude">Longitude:</label>
-                            <input type="number" id="longitude" step="0.000001" value="-75.036050">
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="glide_circle">Glide Circle (miles):</label>
-                        <input type="number" id="glide_circle" step="0.1" value="1.0" min="0.1" max="5" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="descent_rate">Canopy Descent Rate (mph):</label>
-                        <input type="number" id="descent_rate" step="0.1" value="8.5" min="5" max="20" required>
                     </div>
                     
                     <button type="submit" class="btn" id="calculateBtn">Calculate Jump Plan</button>
@@ -346,6 +544,28 @@
             latInput.required = true;
             lonInput.required = true;
         });
+
+        // Mobile collapsible sections
+        const locationToggle = document.getElementById('locationToggle');
+        const locationContent = document.getElementById('locationContent');
+        const paramsToggle = document.getElementById('paramsToggle');
+        const paramsContent = document.getElementById('paramsContent');
+
+        if (locationToggle) {
+            locationToggle.addEventListener('click', () => {
+                locationContent.classList.toggle('show');
+                const icon = locationContent.classList.contains('show') ? '📍' : '📍';
+                locationToggle.textContent = `${icon} Location Selection`;
+            });
+        }
+
+        if (paramsToggle) {
+            paramsToggle.addEventListener('click', () => {
+                paramsContent.classList.toggle('show');
+                const icon = paramsContent.classList.contains('show') ? '⚙️' : '⚙️';
+                paramsToggle.textContent = `${icon} Jump Parameters`;
+            });
+        }
 
         // Auto-fill coordinates when dropzone is selected
         dropzoneSelect.addEventListener('change', function() {
