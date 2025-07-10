@@ -3,16 +3,46 @@ from get_winds import get_winds_aloft
 from physics import calculate_FF_drift, calculate_canopy_drift
 from coord_math import feet_to_lat_long_offset
 from plotting import plot_jump_map
+from dropzones import get_dropzones_by_region, search_dropzone
 import os
 import tempfile
 import math
 
 app = Flask(__name__)
 
+# Production configuration
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-key-change-in-production')
+
+# Set debug mode based on environment
+if os.environ.get('RENDER'):
+    app.config['DEBUG'] = False
+else:
+    app.config['DEBUG'] = True
+
 @app.route('/')
 def index():
     """Main page with form inputs"""
-    return render_template('index.html')
+    dropzones = get_dropzones_by_region()
+    return render_template('index.html', dropzones=dropzones)
+
+@app.route('/get_dropzone_coords')
+def get_dropzone_coords():
+    """Get coordinates for a specific dropzone"""
+    dz_name = request.args.get('name', '')
+    name, coords = search_dropzone(dz_name)
+    
+    if coords:
+        return jsonify({
+            'success': True,
+            'name': name,
+            'latitude': coords['lat'],
+            'longitude': coords['lon']
+        })
+    else:
+        return jsonify({
+            'success': False,
+            'error': 'Dropzone not found'
+        }), 404
 
 @app.route('/calculate', methods=['POST'])
 def calculate_jump():
@@ -20,8 +50,26 @@ def calculate_jump():
     try:
         # Get form data
         data = request.get_json()
-        lat = float(data.get('latitude', 39.707250))
-        lon = float(data.get('longitude', -75.036050))
+        
+        # Check if using dropzone or custom coordinates
+        use_dropzone = data.get('use_dropzone', False)
+        
+        if use_dropzone:
+            dz_name = data.get('dropzone_name', '')
+            name, coords = search_dropzone(dz_name)
+            if not coords:
+                return jsonify({
+                    'success': False,
+                    'error': f'Dropzone "{dz_name}" not found'
+                }), 400
+            lat = coords['lat']
+            lon = coords['lon']
+            location_name = name
+        else:
+            lat = float(data.get('latitude', 39.707250))
+            lon = float(data.get('longitude', -75.036050))
+            location_name = f"Custom Location ({lat:.4f}, {lon:.4f})"
+        
         canopy_glide_circle = float(data.get('glide_circle', 1.0))
         canopy_descent_rate = float(data.get('descent_rate', 8.5))
         
@@ -63,6 +111,7 @@ def calculate_jump():
         results = {
             'success': True,
             'map_html': map_html,
+            'location_name': location_name,
             'summary': {
                 'exit_lat': round(ideal_exit_lat, 6),
                 'exit_lon': round(ideal_exit_lon, 6),
@@ -91,4 +140,6 @@ def health_check():
     return jsonify({'status': 'healthy'})
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    # Use PORT environment variable for production
+    port = int(os.environ.get('PORT', 5000))
+    app.run(debug=app.config['DEBUG'], host='0.0.0.0', port=port)

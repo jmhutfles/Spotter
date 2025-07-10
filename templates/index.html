@@ -62,18 +62,51 @@
             color: #2c3e50;
         }
         
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
             border: 2px solid #e9ecef;
             border-radius: 8px;
             font-size: 16px;
             transition: border-color 0.3s;
+            box-sizing: border-box;
+            background: white;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             outline: none;
             border-color: #667eea;
+        }
+        
+        .location-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #dee2e6;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .toggle-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .location-section {
+            display: none;
+        }
+        
+        .location-section.active {
+            display: block;
         }
         
         .btn {
@@ -179,6 +212,16 @@
             color: #6c757d;
             font-size: 18px;
         }
+
+        .location-name {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #28a745;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -191,14 +234,47 @@
         <div class="content">
             <div class="sidebar">
                 <form id="jumpForm">
+                    <!-- Location Toggle -->
                     <div class="form-group">
-                        <label for="latitude">Latitude:</label>
-                        <input type="number" id="latitude" step="0.000001" value="39.707250" required>
+                        <label>Location Selection:</label>
+                        <div class="location-toggle">
+                            <div class="toggle-btn active" id="dropzoneToggle">Dropzone</div>
+                            <div class="toggle-btn" id="customToggle">Custom</div>
+                        </div>
                     </div>
-                    
-                    <div class="form-group">
-                        <label for="longitude">Longitude:</label>
-                        <input type="number" id="longitude" step="0.000001" value="-75.036050" required>
+
+                    <!-- Dropzone Selection -->
+                    <div id="dropzoneSection" class="location-section active">
+                        <div class="form-group">
+                            <label for="dropzone_select">Select Dropzone:</label>
+                            <select id="dropzone_select" required>
+                                <option value="">Choose a dropzone...</option>
+                                {% for region, dropzones in dropzones.items() %}
+                                    <optgroup label="{{ region.replace('_', ' ').title() }}">
+                                        {% for dz_name, coords in dropzones.items() %}
+                                            <option value="{{ dz_name }}" 
+                                                    data-lat="{{ coords.lat }}" 
+                                                    data-lon="{{ coords.lon }}">
+                                                {{ dz_name }}
+                                            </option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Custom Coordinates -->
+                    <div id="customSection" class="location-section">
+                        <div class="form-group">
+                            <label for="latitude">Latitude:</label>
+                            <input type="number" id="latitude" step="0.000001" value="39.707250">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="longitude">Longitude:</label>
+                            <input type="number" id="longitude" step="0.000001" value="-75.036050">
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -213,6 +289,8 @@
                     
                     <button type="submit" class="btn" id="calculateBtn">Calculate Jump Plan</button>
                 </form>
+
+                <div id="locationName" class="location-name" style="display: none;"></div>
                 
                 <div id="summary" class="summary" style="display: none;">
                     <h3>Jump Summary</h3>
@@ -224,7 +302,7 @@
             
             <div class="map-container">
                 <div id="mapContent" class="placeholder">
-                    Enter coordinates and click "Calculate Jump Plan" to see your optimal exit point
+                    Select a dropzone or enter coordinates and click "Calculate Jump Plan"
                 </div>
                 
                 <div id="loading" class="loading">
@@ -236,6 +314,51 @@
     </div>
 
     <script>
+        // Location toggle functionality
+        const dropzoneToggle = document.getElementById('dropzoneToggle');
+        const customToggle = document.getElementById('customToggle');
+        const dropzoneSection = document.getElementById('dropzoneSection');
+        const customSection = document.getElementById('customSection');
+        const dropzoneSelect = document.getElementById('dropzone_select');
+        const latInput = document.getElementById('latitude');
+        const lonInput = document.getElementById('longitude');
+
+        let useDropzone = true;
+
+        dropzoneToggle.addEventListener('click', () => {
+            useDropzone = true;
+            dropzoneToggle.classList.add('active');
+            customToggle.classList.remove('active');
+            dropzoneSection.classList.add('active');
+            customSection.classList.remove('active');
+            dropzoneSelect.required = true;
+            latInput.required = false;
+            lonInput.required = false;
+        });
+
+        customToggle.addEventListener('click', () => {
+            useDropzone = false;
+            customToggle.classList.add('active');
+            dropzoneToggle.classList.remove('active');
+            customSection.classList.add('active');
+            dropzoneSection.classList.remove('active');
+            dropzoneSelect.required = false;
+            latInput.required = true;
+            lonInput.required = true;
+        });
+
+        // Auto-fill coordinates when dropzone is selected
+        dropzoneSelect.addEventListener('change', function() {
+            if (this.value) {
+                const selectedOption = this.options[this.selectedIndex];
+                const lat = selectedOption.getAttribute('data-lat');
+                const lon = selectedOption.getAttribute('data-lon');
+                latInput.value = lat;
+                lonInput.value = lon;
+            }
+        });
+
+        // Form submission
         document.getElementById('jumpForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -244,6 +367,7 @@
             const mapContent = document.getElementById('mapContent');
             const summary = document.getElementById('summary');
             const error = document.getElementById('error');
+            const locationName = document.getElementById('locationName');
             
             // Show loading state
             btn.disabled = true;
@@ -251,14 +375,21 @@
             loading.style.display = 'block';
             summary.style.display = 'none';
             error.style.display = 'none';
+            locationName.style.display = 'none';
             
             // Collect form data
             const formData = {
-                latitude: parseFloat(document.getElementById('latitude').value),
-                longitude: parseFloat(document.getElementById('longitude').value),
+                use_dropzone: useDropzone,
                 glide_circle: parseFloat(document.getElementById('glide_circle').value),
                 descent_rate: parseFloat(document.getElementById('descent_rate').value)
             };
+
+            if (useDropzone) {
+                formData.dropzone_name = dropzoneSelect.value;
+            } else {
+                formData.latitude = parseFloat(latInput.value);
+                formData.longitude = parseFloat(lonInput.value);
+            }
             
             try {
                 const response = await fetch('/calculate', {
@@ -272,6 +403,10 @@
                 const result = await response.json();
                 
                 if (result.success) {
+                    // Display location name
+                    locationName.textContent = `📍 ${result.location_name}`;
+                    locationName.style.display = 'block';
+
                     // Display map
                     mapContent.innerHTML = result.map_html;
                     
